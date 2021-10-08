@@ -155,3 +155,10 @@
     padding-bottom: 3px;
     margin-right: 2px;
 }
+.table_button{
+    max-height: 17px;
+}
+.table_button:hover{
+    cursor: pointer;
+    opacity: 75%;
+}

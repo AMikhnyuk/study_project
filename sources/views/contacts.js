@@ -1,26 +1,28 @@
-import { JetView } from "webix-jet";
-import { contactsCollection, statusesCollection } from "../models/collections";
+import {JetView} from "webix-jet";
+
+import {contactsCollection, statusesCollection} from "../models/collections";
 
 export default class ContactsView extends JetView {
 	config() {
-		const contacts_list = {
+		const contactsList = {
 			view: "list",
 			select: "true",
 			css: "contacts_list",
 			localId: "contacts_list",
-			template: function ({ Photo, FirstName, LastName, Company }) {
+			template({Photo, FirstName, LastName, Company}) {
 				return `<div class="list_item">
 					<div class="item_img">
-						<img src=${Photo ? Photo : "./sources/images/svg/user.svg"} class="img_img">
+						<img src=${Photo || "./sources/images/svg/user.svg"} class="img_img">
 					</div>
 					<div class="item_info">
 						<div class="info_title">${FirstName} ${LastName}</div>
 						<div>${Company}</div>
 					</div>
-				</div>`},
+				</div>`;
+			},
 			on: {
 				onAfterSelect: (id) => {
-					this.$$("contacts_profile").parse(contactsCollection.getItem(id))
+					this.$$("contacts_profile").parse(contactsCollection.getItem(id));
 				}
 			},
 			scroll: false,
@@ -29,13 +31,16 @@ export default class ContactsView extends JetView {
 			},
 			gravity: 2
 
-		}
-		const contacts_profile = {
+		};
+		const contactsProfile = {
 			localId: "contacts_profile",
 
-			template: function ({ FirstName, LastName, Photo, Email, Skype, Job, Company, Address, Birthday, StatusID }) {
-
-				const st = statusesCollection.getItem(StatusID)
+			template({
+				FirstName, LastName, Photo,
+				Email, Skype, Job, Company,
+				Address, Birthday, StatusID
+			}) {
+				const st = statusesCollection.getItem(StatusID);
 				return `<div class="contact_header">
 						<span class="header_title">
 							${FirstName} ${LastName}
@@ -53,7 +58,7 @@ export default class ContactsView extends JetView {
 					</div>
 							<div class="contact_body">
 								<div class="body_img">
-									<img class="img_pic" src=${Photo ? Photo : "./sources/images/svg/user.svg"}>
+									<img class="img_pic" src=${Photo || "./sources/images/svg/user.svg"}>
 									<i class="webix_icon wxi-${st ? st.Icon : ""} img_status">${st ? st.Value : "No status"}</i>
 								</div>
 								<div class="body_info">
@@ -86,28 +91,27 @@ export default class ContactsView extends JetView {
 										</div>
 									</div>
 								</div>
-					</div >`
+					</div >`;
 			},
 			gravity: 5,
 			padding: 20,
-			data: [{ id: 1, Name: "Sasha" }]
+			data: [{id: 1, Name: "Sasha"}]
 
-		}
+		};
 		const ui = {
-			cols: [contacts_list, contacts_profile],
-			gravity: 5
-		}
-		return ui
+			cols: [contactsList, contactsProfile],
+			gravity: 6
+		};
+		return ui;
 	}
+
 	init() {
-		const list = this.$$("contacts_list")
-		list.sync(contactsCollection)
+		const list = this.$$("contacts_list");
+		list.sync(contactsCollection);
 		webix.promise.all([contactsCollection.waitData, statusesCollection.waitData])
 			.then(() => {
-				list.refresh()
-				list.select(contactsCollection.getFirstId())
-
-			})
-
+				list.refresh();
+				list.select(contactsCollection.getFirstId());
+			});
 	}
 }
