@@ -4,7 +4,8 @@ export default class TopView extends JetView {
 	config() {
 		const header = {
 			type: "header",
-			template: "Hello"
+			localId: "top_header",
+			template: "Value"
 		};
 		const menu = {
 			view: "list",
@@ -12,8 +13,11 @@ export default class TopView extends JetView {
 			select: true,
 			scroll: false,
 			data: [{id: "contacts", value: "Contacts"}, {id: "activities", value: "Activities"}, {id: "setting", value: "Settings"}],
-			click: (id) => {
-				this.show(`${id}`);
+			on: {
+				onAfterSelect: (id) => {
+					this.show(`${id}`);
+					this.$$("top_header").setHTML(this.$$("top_list").getSelectedItem().value);
+				}
 			}
 		};
 		const ui = {
