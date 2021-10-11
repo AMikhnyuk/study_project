@@ -15,7 +15,7 @@ export default class ActivitiesView extends JetView {
 					view: "button",
 					label: '<i class="webix_icon wxi-plus"></i><span>Add activity</span>',
 					click: () => {
-						this.ui(ActWindowView).showWindow("Add");
+						this.win.showWindow("Add");
 					},
 					width: 150
 				}
@@ -91,7 +91,7 @@ export default class ActivitiesView extends JetView {
 			],
 			onClick: {
 				edit: (e, item) => {
-					this.ui(ActWindowView).showWindow("Edit", item.row);
+					this.win.showWindow("Edit", item.row);
 					return false;
 				},
 				remove: (e, item) => {
@@ -112,7 +112,7 @@ export default class ActivitiesView extends JetView {
 	init() {
 		const table = this.$$("act_table");
 		table.showOverlay("Loading...");
-
+		this.win = this.ui(ActWindowView);
 		webix.promise.all([
 			activitiesCollection.waitData,
 			actTypesCollection.waitData,

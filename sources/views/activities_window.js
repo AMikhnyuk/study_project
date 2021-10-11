@@ -82,7 +82,7 @@ export default class ActWindowView extends JetView {
 
 										form.clear();
 										form.clearValidation();
-										this.getRoot().close();
+										this.getRoot().hide();
 									}
 								}
 							},
@@ -94,7 +94,7 @@ export default class ActWindowView extends JetView {
 									const form = this.$$("form");
 									form.clear();
 									form.clearValidation();
-									this.getRoot().close();
+									this.getRoot().hide();
 								}
 							}
 						],
