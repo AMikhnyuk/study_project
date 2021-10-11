@@ -1,6 +1,8 @@
 import {JetView} from "webix-jet";
 
-import {activitiesCollection, actTypesCollection, contactsCollection} from "../models/collections";
+import actTypesCollection from "../models/actTypesCollection";
+import activitiesCollection from "../models/activitiesCollection";
+import contactsCollection from "../models/contactsCollection";
 import ActWindowView from "./activities_window";
 
 export default class ActivitiesView extends JetView {
@@ -13,8 +15,7 @@ export default class ActivitiesView extends JetView {
 					view: "button",
 					label: '<i class="webix_icon wxi-plus"></i><span>Add activity</span>',
 					click: () => {
-						this.ui(ActWindowView).showWindow();
-						this.app.callEvent("addWindow");
+						this.ui(ActWindowView).showWindow("Add");
 					},
 					width: 150
 				}
@@ -26,10 +27,7 @@ export default class ActivitiesView extends JetView {
 			localId: "act_table",
 			css: "webix_header_border webix_data_border",
 			columns: [
-				{
-					id: "checkbox", width: 40, header: "", template: "{common.checkbox()}"
-
-				},
+				{id: "State", width: 40, header: "", template: "{common.checkbox()}", checkValue: "Close", uncheckValue: "Open"},
 				{
 					id: "TypeID",
 					header: ["Activity type", {
@@ -37,8 +35,12 @@ export default class ActivitiesView extends JetView {
 						suggest: {
 
 							body: {
-								data: actTypesCollection,
-								template: "#Value#"
+								template: (obj) => {
+									if (actTypesCollection.exists(obj.id)) {
+										return actTypesCollection.getItem(obj.id).Value;
+									}
+									return "";
+								}
 							}
 						}
 					}],
@@ -53,14 +55,8 @@ export default class ActivitiesView extends JetView {
 					id: "ObjDate",
 					header: ["Due date", {content: "dateRangeFilter"}],
 					width: 150,
-					template({ObjDate}) {
-						const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-						return `${ObjDate.getDate()} ${month[ObjDate.getMonth()]} ${ObjDate.getFullYear()}`;
-					},
-					format: webix.i18n.dateFormatStr,
-
-					sort: "date"
+					sort: "date",
+					format: webix.Date.dateToStr("%d %M %Y")
 				},
 				{id: "Details", header: ["Details", {content: "textFilter"}], fillspace: true, sort: "text"},
 				{
@@ -69,15 +65,18 @@ export default class ActivitiesView extends JetView {
 						"Contact",
 						{
 							content: "richSelectFilter",
-							contentId: "contact",
 							suggest: {
 
 								body: {
-									data: contactsCollection,
-									template: "#FirstName# #LastName#"
+									template: (obj) => {
+										if (contactsCollection.exists(obj.id)) {
+											const {FirstName, LastName} = contactsCollection.getItem(obj.id);
+											return `${FirstName} ${LastName}`;
+										}
+										return "";
+									}
 								}
 							}
-
 						}],
 
 					template({ContactID}) {
@@ -92,8 +91,7 @@ export default class ActivitiesView extends JetView {
 			],
 			onClick: {
 				edit: (e, item) => {
-					this.ui(ActWindowView).showWindow();
-					this.app.callEvent("editWindow", [item.row]);
+					this.ui(ActWindowView).showWindow("Edit", item.row);
 					return false;
 				},
 				remove: (e, item) => {
@@ -113,15 +111,17 @@ export default class ActivitiesView extends JetView {
 
 	init() {
 		const table = this.$$("act_table");
-		table.sync(activitiesCollection);
 		table.showOverlay("Loading...");
+
 		webix.promise.all([
 			activitiesCollection.waitData,
 			actTypesCollection.waitData,
 			contactsCollection.waitData
 		])
 			.then(() => {
-				table.refresh();
+				table.sync(activitiesCollection, () => {
+					table.filterByAll();
+				});
 				table.hideOverlay();
 			});
 	}

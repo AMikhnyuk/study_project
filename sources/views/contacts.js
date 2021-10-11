@@ -1,6 +1,7 @@
 import {JetView} from "webix-jet";
 
-import {contactsCollection, statusesCollection} from "../models/collections";
+import contactsCollection from "../models/contactsCollection";
+import statusesCollection from "../models/statusesCollection";
 
 export default class ContactsView extends JetView {
 	config() {
@@ -107,10 +108,10 @@ export default class ContactsView extends JetView {
 
 	init() {
 		const list = this.$$("contacts_list");
-		list.sync(contactsCollection);
+
 		webix.promise.all([contactsCollection.waitData, statusesCollection.waitData])
 			.then(() => {
-				list.refresh();
+				list.sync(contactsCollection);
 				list.select(contactsCollection.getFirstId());
 			});
 	}

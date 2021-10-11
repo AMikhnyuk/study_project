@@ -1,11 +1,15 @@
 import {JetView} from "webix-jet";
 
-import {activitiesCollection, actTypesCollection, contactsCollection} from "../models/collections";
+
+import actTypesCollection from "../models/actTypesCollection";
+import activitiesCollection from "../models/activitiesCollection";
+import contactsCollection from "../models/contactsCollection";
 
 export default class ActWindowView extends JetView {
 	config() {
 		return {
 			view: "window",
+			localId: "window",
 			width: 600,
 			height: 500,
 			head: "Label",
@@ -23,9 +27,7 @@ export default class ActWindowView extends JetView {
 						options: {
 							body: {
 								data: actTypesCollection,
-								template({Value}) {
-									return `${Value}`;
-								}
+								template: "#Value#"
 							}
 						},
 						invalidMessage: "Choose activity"
@@ -51,7 +53,7 @@ export default class ActWindowView extends JetView {
 						],
 						borderless: true
 					},
-					{view: "checkbox", labelRight: "Completed", labelWidth: 0, name: "checkbox"},
+					{view: "checkbox", labelRight: "Completed", labelWidth: 0, name: "State", checkValue: "Close", uncheckValue: "Open"},
 					{
 						view: "toolbar",
 						localId: "buttons",
@@ -69,8 +71,8 @@ export default class ActWindowView extends JetView {
 									if (form.validate()) {
 										const dateFormat = webix.Date.dateToStr("%Y-%m-%d");
 										const timeFormat = webix.Date.dateToStr("%H:%i");
-										const rdyDate = dateFormat(formValues.Date);
-										const rdyTime = timeFormat(formValues.Time);
+										const rdyDate = dateFormat(formValues.Date ? formValues.Date : new Date());
+										const rdyTime = timeFormat(formValues.Time ? formValues.Time : new Date());
 										formValues.DueDate = `${rdyDate} ${rdyTime}`;
 										formValues.ObjDate = new Date(formValues.DueDate);
 										if (activitiesCollection.getItem(formValues.id)) {
@@ -80,7 +82,7 @@ export default class ActWindowView extends JetView {
 
 										form.clear();
 										form.clearValidation();
-										this.getRoot().hide();
+										this.getRoot().close();
 									}
 								}
 							},
@@ -92,7 +94,7 @@ export default class ActWindowView extends JetView {
 									const form = this.$$("form");
 									form.clear();
 									form.clearValidation();
-									this.getRoot().hide();
+									this.getRoot().close();
 								}
 							}
 						],
@@ -109,22 +111,12 @@ export default class ActWindowView extends JetView {
 		};
 	}
 
-	showWindow() {
+	showWindow(text, id) {
 		this.getRoot().show();
-	}
+		if (id) this.$$("form").setValues(activitiesCollection.getItem(id));
 
-	init(view) {
-		const form = this.$$("form");
-		this.on(this.app, "editWindow", (id) => {
-			if (activitiesCollection.getItem(id)) {
-				form.setValues(activitiesCollection.getItem(id));
-			}
-			view.getHead().setHTML("Edit activity");
-			this.$$("save").setValue("Edit");
-		});
-		this.on(this.app, "addWindow", () => {
-			view.getHead().setHTML("Add activity");
-			this.$$("save").setValue("Add");
-		});
+
+		this.$$("window").getHead().setHTML(`${text} activity`);
+		this.$$("save").setValue(text);
 	}
 }
