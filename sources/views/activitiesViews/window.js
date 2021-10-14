@@ -1,9 +1,9 @@
 import {JetView} from "webix-jet";
 
 
-import actTypesCollection from "../models/actTypesCollection";
-import activitiesCollection from "../models/activitiesCollection";
-import contactsCollection from "../models/contactsCollection";
+import actTypesCollection from "../../models/actTypesCollection";
+import activitiesCollection from "../../models/activitiesCollection";
+import contactsCollection from "../../models/contactsCollection";
 
 export default class ActWindowView extends JetView {
 	config() {
@@ -36,11 +36,12 @@ export default class ActWindowView extends JetView {
 						view: "richselect",
 						label: "Contact",
 						name: "ContactID",
+						localId: "contact",
 						options: {
 							body: {
 								data: contactsCollection,
 								template({FirstName, LastName}) {
-									return FirstName && LastName ? `${FirstName} ${LastName}` : "";
+									return `${FirstName || "Noname"} ${LastName || "Noname"}`;
 								}
 							}
 						},
@@ -111,10 +112,14 @@ export default class ActWindowView extends JetView {
 		};
 	}
 
-	showWindow(text, id) {
+	showWindow(text, id, contactID) {
 		this.getRoot().show();
-		if (id) this.$$("form").setValues(activitiesCollection.getItem(id));
-
+		const form = this.$$("form");
+		if (id)	form.setValues(activitiesCollection.getItem(id));
+		if (contactID) {
+			form.setValues({ContactID: contactID});
+			this.$$("contact").disable();
+		}
 
 		this.$$("window").getHead().setHTML(`${text} activity`);
 		this.$$("save").setValue(text);

@@ -162,3 +162,7 @@
     cursor: pointer;
     opacity: 75%;
 }
+.form_image{
+    height: 205px;
+    width: 205px;
+}
