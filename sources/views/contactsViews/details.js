@@ -36,35 +36,37 @@ export default class DetailsView extends JetView {
                             <div class="contact_body">
                                 <div class="body_img">
                                     <img class="img_pic" src=${Photo || "./sources/images/svg/user.svg"}>
-                                    <i class="webix_icon wxi-${st ? st.Icon : ""} img_status">${st ? st.Value : "No status"}</i>
+                                   	<div class="status"> 
+								   		${st ? `<i class="webix_icon wxi-${st.Icon} img_status"></i>` : ""}<span>${st ? st.Value : "No Status"}</span>
+									</div>
                                 </div>
                                 <div class="body_info">
                                     <div class="info_block">
                                         <div class="block_item">
                                             <img class="item_ico" src="./sources/images/svg/email.svg">
-                                            <span class="item_text">${Email}</span>
+                                            <span class="item_text">${Email || "No Email"}</span>
                                         </div>
                                         <div class="block_item">
                                             <img class="item_ico" src="./sources/images/svg/skype.svg">
-                                            <span class="item_text">${Skype}</span>
+                                            <span class="item_text">${Skype || "No Skype"}</span>
                                         </div>
                                         <div class="block_item">
                                             <img class="item_ico" src="./sources/images/svg/tag.svg">
-                                            <span class="item_text">${Job}</span>
+                                            <span class="item_text">${Job || "No Job"}</span>
                                         </div>
                                         <div class="block_item">
                                             <img class="item_ico" src="./sources/images/svg/briefcase.svg">
-                                            <span class="item_text">${Company}</span>
+                                            <span class="item_text">${Company || "No Company"}</span>
                                         </div>
                                     </div>
                                     <div class="info_block">
                                         <div class="block_item">
                                             <img class="item_ico" src="./sources/images/svg/date.svg">
-                                            <span class="item_text">${webix.Date.dateToStr("%d %M %Y")(Birthday)}</span>
+                                            <span class="item_text">${webix.Date.dateToStr("%d %M %Y")(Birthday) || "No Date"}</span>
                                         </div>
                                         <div class="block_item">
                                             <img class="item_ico" src="./sources/images/svg/location.svg">
-                                            <span class="item_text">${Address}</span>
+                                            <span class="item_text">${Address || "No Address"}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -72,20 +74,10 @@ export default class DetailsView extends JetView {
 			},
 			onClick: {
 				delete_btn: () => {
-					const id = this.$$("contactsDetails").getValues().id;
-					webix.confirm("Deleting cannot be undone. Delete?").then(() => {
-						contactsCollection.remove(id);
-						activitiesCollection.data.each((obj) => {
-							if (+obj.ContactID === id) {
-								activitiesCollection.remove(obj.id);
-							}
-						});
-						this.app.callEvent("cancel");
-					});
+					this.deleteContact();
 				},
 				edit_btn: () => {
-					const id = this.$$("contactsDetails").getValues().id;
-					this.show(`/top/contacts/contactsViews.form?id=${id}`);
+					this.show(`contactsViews.form?id=${this.paramId}`);
 				}
 			},
 			padding: 20,
@@ -99,13 +91,13 @@ export default class DetailsView extends JetView {
 			multiview: true
 
 		};
+		const activitiesTable = new ActivitiesTable(this.app, true);
 		const addActivitiesBtn = {
 			view: "button",
 			label: '<i class="webix_icon wxi-plus"></i>Add Activity',
 			width: 250,
 			click: () => {
-				const id = this.getParam("id");
-				this.win.showWindow("Add", "", id);
+				this.win.showWindow("Add", "", this.paramId);
 			}
 		};
 
@@ -116,7 +108,7 @@ export default class DetailsView extends JetView {
 				cells: [
 					{
 						rows: [
-							{$subview: ActivitiesTable},
+							{$subview: activitiesTable},
 							{cols: [{}, addActivitiesBtn]}
 						],
 						id: "Activities"
@@ -136,27 +128,32 @@ export default class DetailsView extends JetView {
 	}
 
 	urlChange() {
-		const id = this.getParam("id");
+		this.paramId = this.getParam("id");
 		webix.promise.all([
 			activitiesCollection.waitData,
 			contactsCollection.waitData
 		])
 			.then(() => {
-				if (contactsCollection.getItem(id)) {
-					this.$$("contactsDetails").parse(contactsCollection.getItem(id));
+				const item = contactsCollection.getItem(this.paramId);
+				if (item) {
+					this.$$("contactsDetails").parse(item);
 				}
 			});
 	}
 
-	init(view) {
+	init() {
 		this.win = this.ui(ActWindowView);
-		webix.promise.all([
-			activitiesCollection.waitData,
-			contactsCollection.waitData
-		])
-			.then(() => {
-				const table = view.queryView({view: "datatable"});
-				table.hideColumn("ContactID");
+	}
+
+	deleteContact() {
+		webix.confirm("Deleting cannot be undone. Delete?").then(() => {
+			contactsCollection.remove(this.paramId);
+			activitiesCollection.data.each((obj) => {
+				if (+obj.ContactID === this.paramId) {
+					activitiesCollection.remove(obj.id);
+				}
 			});
+			this.app.callEvent("select");
+		});
 	}
 }

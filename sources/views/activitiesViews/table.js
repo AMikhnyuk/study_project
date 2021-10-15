@@ -6,6 +6,11 @@ import contactsCollection from "../../models/contactsCollection";
 import ActWindowView from "./window";
 
 export default class ActivitiesTable extends JetView {
+	constructor(app, hideColumn) {
+		super(app);
+		this.hideColumn = hideColumn;
+	}
+
 	config() {
 		const activitiesTable = {
 			view: "datatable",
@@ -21,12 +26,7 @@ export default class ActivitiesTable extends JetView {
 						suggest: {
 
 							body: {
-								template: (obj) => {
-									if (actTypesCollection.exists(obj.id)) {
-										return actTypesCollection.getItem(obj.id).Value;
-									}
-									return "";
-								}
+								template: obj => this.selectTemplate(actTypesCollection, obj, "Value")
 							}
 						}
 					}],
@@ -47,6 +47,7 @@ export default class ActivitiesTable extends JetView {
 				{id: "Details", header: ["Details", {content: "textFilter"}], fillspace: true, sort: "text"},
 				{
 					id: "ContactID",
+					hidden: this.hideColumn,
 					header: [
 						"Contact",
 						{
@@ -56,12 +57,11 @@ export default class ActivitiesTable extends JetView {
 							suggest: {
 
 								body: {
+
 									template: (obj) => {
-										if (contactsCollection.exists(obj.id)) {
-											const {FirstName, LastName} = contactsCollection.getItem(obj.id);
-											return `${FirstName} ${LastName}`;
-										}
-										return "";
+										const FirstName = this.selectTemplate(contactsCollection, obj, "FirstName");
+										const LastName = this.selectTemplate(contactsCollection, obj, "LastName");
+										return `${FirstName} ${LastName}`;
 									}
 
 								}
@@ -89,6 +89,11 @@ export default class ActivitiesTable extends JetView {
 					});
 					return false;
 				}
+			},
+			on: {
+				onAfterFilter: () => {
+					if (this.contactId) this.getRoot().filter("#ContactID#", this.contactId, true);
+				}
 			}
 
 		};
@@ -107,13 +112,20 @@ export default class ActivitiesTable extends JetView {
 			contactsCollection.waitData
 		])
 			.then(() => {
-				const id = this.getParam("id");
+				this.contactId = this.getParam("id");
 				view.sync(activitiesCollection, () => {
 					view.filterByAll();
 
-					if (id)view.filter("#ContactID#", id);
+					if (this.contactId)view.filter("#ContactID#", this.contactId, true);
 				});
 				view.hideOverlay();
 			});
+	}
+
+	selectTemplate(collection, obj, prop) {
+		if (collection.exists(obj.id)) {
+			return collection.getItem(obj.id)[prop];
+		}
+		return "";
 	}
 }

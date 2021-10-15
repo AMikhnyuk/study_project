@@ -68,19 +68,27 @@
 .item_img{
     margin-right: 20px;
     height: 45px;
+    
 }
 .item_info{
     padding-top: 5px;
+    max-width:200px;
+    
 }
 .info_title{
     margin-bottom: 5px;
     color: black;
     font-size: 16px;
 }
+.info_text{
+    overflow: hidden;
+    text-overflow:ellipsis;
+}
 .img_img{
     width: 45px;
     height: 45px;
     border-radius: 50%;
+    object-fit:cover;
 }
 .contact_header{
     display: flex;
@@ -125,13 +133,16 @@
 }
 .body_img{
     margin-right: 50px;
+    
 }
 .img_pic{
     width: 150px;
     height: 150px;
+    object-fit:cover;
 }
-.img_status{
-    padding-left: 40px;
+.status{
+    display: flex;
+    justify-content: center;
 }
 .body_info{
     display: flex;
@@ -140,20 +151,26 @@
 }
 .info_block{
     margin-right: 70px;
-    
+    max-width:200px;
+    flex: 1 1 auto;
 }
 .info_block:last-child{
     margin-right: 0px;
-    flex: 1 1 auto;
+    
 }
 .block_item{
     display: flex;
     margin-bottom: 27px;
+    
+    
 }
 .item_ico{
     max-height: 14px;
     padding-bottom: 3px;
     margin-right: 2px;
+}
+.item_text{
+    overflow:auto;
 }
 .table_button{
     max-height: 17px;
@@ -165,4 +182,5 @@
 .form_image{
     height: 205px;
     width: 205px;
+    object-fit:cover;
 }

@@ -66,25 +66,7 @@ export default class ActWindowView extends JetView {
 								width: 100,
 								localId: "save",
 								click: () => {
-									const form = this.$$("form");
-									const formValues = form.getValues();
-
-									if (form.validate()) {
-										const dateFormat = webix.Date.dateToStr("%Y-%m-%d");
-										const timeFormat = webix.Date.dateToStr("%H:%i");
-										const rdyDate = dateFormat(formValues.Date ? formValues.Date : new Date());
-										const rdyTime = timeFormat(formValues.Time ? formValues.Time : new Date());
-										formValues.DueDate = `${rdyDate} ${rdyTime}`;
-										formValues.ObjDate = new Date(formValues.DueDate);
-										if (activitiesCollection.getItem(formValues.id)) {
-											activitiesCollection.updateItem(formValues.id, formValues);
-										}
-										else activitiesCollection.add(formValues);
-
-										form.clear();
-										form.clearValidation();
-										this.getRoot().hide();
-									}
+									this.formSave();
 								}
 							},
 							{
@@ -123,5 +105,27 @@ export default class ActWindowView extends JetView {
 
 		this.$$("window").getHead().setHTML(`${text} activity`);
 		this.$$("save").setValue(text);
+	}
+
+	formSave() {
+		const form = this.$$("form");
+		const formValues = form.getValues();
+
+		if (form.validate()) {
+			const dateFormat = webix.Date.dateToStr("%Y-%m-%d");
+			const timeFormat = webix.Date.dateToStr("%H:%i");
+			const rdyDate = dateFormat(formValues.Date ? formValues.Date : new Date());
+			const rdyTime = timeFormat(formValues.Time ? formValues.Time : new Date());
+			formValues.DueDate = `${rdyDate} ${rdyTime}`;
+			formValues.ObjDate = new Date(formValues.DueDate);
+			if (activitiesCollection.exists(formValues.id)) {
+				activitiesCollection.updateItem(formValues.id, formValues);
+			}
+			else activitiesCollection.add(formValues);
+
+			form.clear();
+			form.clearValidation();
+			this.getRoot().hide();
+		}
 	}
 }

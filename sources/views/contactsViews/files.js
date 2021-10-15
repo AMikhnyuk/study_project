@@ -31,13 +31,11 @@ export default class ContactsFiles extends JetView {
 			onClick: {
 				remove: (e, item) => {
 					webix.confirm("Deleting cannot be undone. Delete?").then(() => {
-						const id = this.getParam("id");
 						filesCollection.remove(item.row);
-						this.$$("filesDatatable").filter("#ContactID#", id);
+						this.$$("filesDatatable").filter("#ContactID#", this.paramId);
 					});
 				}
 			},
-			autoHeight: true,
 			data: filesCollection
 		};
 		const uploadFilesBtn = {
@@ -51,7 +49,7 @@ export default class ContactsFiles extends JetView {
 					file.date = new Date();
 				},
 				onAfterFileAdd: (file) => {
-					file.ContactID = this.getParam("id");
+					file.ContactID = this.paramId;
 					filesCollection.add({...file});
 					this.$$("filesDatatable").filter("#ContactID#", file.ContactID);
 				}
@@ -62,7 +60,7 @@ export default class ContactsFiles extends JetView {
 	}
 
 	urlChange() {
-		const id = this.getParam("id");
-		this.$$("filesDatatable").filter("#ContactID#", id);
+		this.paramId = this.getParam("id");
+		this.$$("filesDatatable").filter("#ContactID#", this.paramId);
 	}
 }

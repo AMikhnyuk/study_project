@@ -13,10 +13,14 @@ export default class ContactsFormView extends JetView {
 		const contactsForm = {
 			view: "form",
 			localId: "contactsForm",
+			rules: {
+				FirstName: webix.rules.isNotEmpty,
+				LastName: webix.rules.isNotEmpty
+			},
 			elements: [
 				{
 					cols: [
-						{view: "text", label: "First name", name: "FirstName"},
+						{view: "text", label: "First name", name: "FirstName", invalidMessage: "Is not be empty"},
 						{view: "text", label: "Email", name: "Email", labelWidth: "auto"}
 					],
 					padding: 5,
@@ -25,7 +29,7 @@ export default class ContactsFormView extends JetView {
 				},
 				{
 					cols: [
-						{view: "text", label: "Last name", name: "LastName"},
+						{view: "text", label: "Last name", name: "LastName", invalidMessage: "Is not be empty"},
 						{view: "text", label: "Skype", name: "Skype", labelWidth: "auto"}
 					],
 					padding: 5,
@@ -81,7 +85,9 @@ export default class ContactsFormView extends JetView {
 						{
 							cols: [
 								{
-									template: '<img src="#src#" class="form_image">',
+									template({src}) {
+										return `<img src="${src || "./sources/images/svg/user.svg"}" class="form_image">`;
+									},
 
 									localId: "image",
 									width: 205,
@@ -99,18 +105,17 @@ export default class ContactsFormView extends JetView {
 											multiple: false,
 											on: {
 												onBeforeFileAdd: (upload) => {
-													let file = upload.file;
-													let reader = new FileReader();
-													reader.onload = (event) => {
-														this.$$("image").setValues({src: event.target.result});
-													};
-													reader.readAsDataURL(file);
-
-													return false;
+													this.uploadFile(upload);
 												}
 											}
 										},
-										{view: "button", value: "Delete photo"}
+										{view: "button",
+											value: "Delete photo",
+											click: () => {
+												webix.confirm("Delete photo?").then(() => {
+													this.$$("image").setValues({src: ""});
+												});
+											}}
 									],
 									paddingY: 16
 
@@ -138,26 +143,14 @@ export default class ContactsFormView extends JetView {
 							width: 150,
 							localId: "actionBtn",
 							click: () => {
-								const form = this.$$("contactsForm");
-								const formValues = form.getValues();
-								const dateFormat = webix.Date.dateToStr("%Y-%m-%d %H:%i:%s");
-								formValues.Photo = this.$$("image").getValues().src;
-								formValues.Birthday = dateFormat(formValues.Birthday);
-								formValues.StartDate = dateFormat(formValues.StartDate);
-								if (contactsCollection.getItem(formValues.id)) {
-									contactsCollection.updateItem(formValues.id, formValues);
-								}
-								else {
-									contactsCollection.add(formValues);
-								}
-								form.clear();
-								this.app.callEvent("cancel", [formValues.id]);
-							}},
+								this.formSave();
+							}
+						},
 						{view: "button",
 							value: "Cancel",
 							width: 150,
 							click: () => {
-								this.app.callEvent("cancel", [this.$$("contactsForm").getValues().id]);
+								this.app.callEvent("select", [this.paramId]);
 							}
 						}
 					]
@@ -165,6 +158,7 @@ export default class ContactsFormView extends JetView {
 
 
 			]
+
 
 		};
 		const ui = {
@@ -176,14 +170,14 @@ export default class ContactsFormView extends JetView {
 	}
 
 	urlChange() {
-		const id = this.getParam("id", true);
+		this.paramId = this.getParam("id", true);
 		const form = this.$$("contactsForm");
 		const header = this.$$("contactsFormHeader");
 		const button = this.$$("actionBtn");
-		if (id) {
+		if (this.paramId) {
 			contactsCollection.waitData.then(() => {
-				if (contactsCollection.getItem(id)) {
-					const item = contactsCollection.getItem(id);
+				const item = contactsCollection.getItem(this.paramId);
+				if (item) {
 					form.setValues(item);
 					this.$$("image").setValues({src: item.Photo});
 				}
@@ -196,5 +190,35 @@ export default class ContactsFormView extends JetView {
 			header.setHTML("Add");
 			button.setValue("Add");
 		}
+	}
+
+	formSave() {
+		const form = this.$$("contactsForm");
+		const formValues = form.getValues();
+		if (form.validate()) {
+			const dateFormat = webix.Date.dateToStr("%Y-%m-%d %H:%i");
+			formValues.Photo = this.$$("image").getValues().src;
+			formValues.Birthday = dateFormat(formValues.Birthday);
+			formValues.StartDate = dateFormat(formValues.StartDate);
+			if (contactsCollection.exists(formValues.id)) {
+				contactsCollection.updateItem(formValues.id, formValues);
+			}
+			else {
+				contactsCollection.add(formValues);
+			}
+			form.clear();
+			this.app.callEvent("select", [formValues.id]);
+		}
+	}
+
+	uploadFile(upload) {
+		const file = upload.file;
+		const reader = new FileReader();
+		reader.onload = (event) => {
+			this.$$("image").setValues({src: event.target.result});
+		};
+		reader.readAsDataURL(file);
+
+		return false;
 	}
 }

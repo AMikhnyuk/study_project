@@ -18,13 +18,13 @@ export default class ContactsView extends JetView {
 					</div>
 					<div class="item_info">
 						<div class="info_title">${FirstName} ${LastName}</div>
-						<div>${Company}</div>
+						<div class="info_text">${Company}</div>
 					</div>
 				</div>`;
 			},
 			on: {
 				onAfterSelect: (id) => {
-					this.show(`/top/contacts/contactsViews.details?id=${id}`);
+					this.show(`contactsViews.details?id=${id}`);
 				}
 			},
 			scroll: false,
@@ -38,7 +38,7 @@ export default class ContactsView extends JetView {
 			view: "button",
 			label: '<i class="webix_icon wxi-plus"></i>Add Contact',
 			click: () => {
-				this.show("/top/contacts/contactsViews.form");
+				this.show("contactsViews.form");
 			}
 		};
 
@@ -60,7 +60,7 @@ export default class ContactsView extends JetView {
 			.then(() => {
 				list.sync(contactsCollection);
 				list.select(contactsCollection.getFirstId());
-				this.on(this.app, "cancel", (id) => {
+				this.on(this.app, "select", (id) => {
 					list.unselectAll();
 					if (id)list.select(id);
 					else list.select(contactsCollection.getFirstId());
