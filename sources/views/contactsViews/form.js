@@ -20,7 +20,7 @@ export default class ContactsFormView extends JetView {
 			elements: [
 				{
 					cols: [
-						{view: "text", label: "First name", name: "FirstName", invalidMessage: "Is not be empty"},
+						{view: "text", label: "First name", name: "FirstName", invalidMessage: "Must not be empty"},
 						{view: "text", label: "Email", name: "Email", labelWidth: "auto"}
 					],
 					padding: 5,
@@ -29,7 +29,7 @@ export default class ContactsFormView extends JetView {
 				},
 				{
 					cols: [
-						{view: "text", label: "Last name", name: "LastName", invalidMessage: "Is not be empty"},
+						{view: "text", label: "Last name", name: "LastName", invalidMessage: "Must not be empty"},
 						{view: "text", label: "Skype", name: "Skype", labelWidth: "auto"}
 					],
 					padding: 5,
@@ -187,6 +187,7 @@ export default class ContactsFormView extends JetView {
 		}
 		else {
 			form.clear();
+			this.$$("image").setValues({src: ""});
 			header.setHTML("Add");
 			button.setValue("Add");
 		}

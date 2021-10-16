@@ -100,12 +100,12 @@ export default class ActivitiesTable extends JetView {
 		return activitiesTable;
 	}
 
-	init(view) {
+	init() {
 		this.win = this.ui(ActWindowView);
-		view.showOverlay("Loading...");
 	}
 
 	urlChange(view) {
+		view.showOverlay("Loading...");
 		webix.promise.all([
 			activitiesCollection.waitData,
 			actTypesCollection.waitData,

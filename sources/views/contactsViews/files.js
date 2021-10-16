@@ -22,7 +22,7 @@ export default class ContactsFiles extends JetView {
 				{id: "size",
 					header: "Size",
 					width: 200,
-					sort: "text",
+					sort: "int",
 					template: "#size#Kb"
 				},
 				{id: "Remove", header: "", template: '<i class="webix_icon wxi-trash remove"></i>', width: 40}
