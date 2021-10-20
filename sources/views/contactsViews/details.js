@@ -9,7 +9,9 @@ import ContactsFiles from "./files";
 
 export default class DetailsView extends JetView {
 	config() {
+		const _ = this.app.getService("locale")._;
 		const contactsDetails = {
+
 			localId: "contactsDetails",
 
 			template({
@@ -25,11 +27,11 @@ export default class DetailsView extends JetView {
                         <div class="header_toolbar">
                             <div class="toolbar_button delete_btn">
                                 <img class="button_ico" src="./sources/images/svg/trash.svg">
-                                <span>Delete</span>
+                                <span>${_("Delete")}</span>
                             </div>
                             <div class="toolbar_button edit_btn">
                                 <img class="button_ico" src="./sources/images/svg/edit.svg">
-                                <span>Edit</span>
+                                <span>${_("Edit")}</span>
                             </div>
                         </div>
                     </div>
@@ -37,36 +39,36 @@ export default class DetailsView extends JetView {
                                 <div class="body_img">
                                     <img class="img_pic" src=${Photo || "./sources/images/svg/user.svg"}>
                                    	<div class="status"> 
-								   		${st ? `<i class="webix_icon wxi-${st.Icon} img_status"></i>` : ""}<span>${st ? st.Value : "No Status"}</span>
+								   		${st ? `<i class="webix_icon wxi-${st.Icon} img_status"></i>` : ""}<span>${st ? st.Value : _("No Status")}</span>
 									</div>
                                 </div>
                                 <div class="body_info">
                                     <div class="info_block">
                                         <div class="block_item">
                                             <img class="item_ico" src="./sources/images/svg/email.svg">
-                                            <span class="item_text">${Email || "No Email"}</span>
+                                            <span class="item_text">${Email || _("No Email")}</span>
                                         </div>
                                         <div class="block_item">
                                             <img class="item_ico" src="./sources/images/svg/skype.svg">
-                                            <span class="item_text">${Skype || "No Skype"}</span>
+                                            <span class="item_text">${Skype || _("No Skype")}</span>
                                         </div>
                                         <div class="block_item">
                                             <img class="item_ico" src="./sources/images/svg/tag.svg">
-                                            <span class="item_text">${Job || "No Job"}</span>
+                                            <span class="item_text">${Job || _("No Job")}</span>
                                         </div>
                                         <div class="block_item">
                                             <img class="item_ico" src="./sources/images/svg/briefcase.svg">
-                                            <span class="item_text">${Company || "No Company"}</span>
+                                            <span class="item_text">${Company || _("No Company")}</span>
                                         </div>
                                     </div>
                                     <div class="info_block">
                                         <div class="block_item">
                                             <img class="item_ico" src="./sources/images/svg/date.svg">
-                                            <span class="item_text">${webix.Date.dateToStr("%d %M %Y")(Birthday) || "No Date"}</span>
+                                            <span class="item_text">${webix.Date.dateToStr("%d %M %Y")(Birthday) || _("No Date")}</span>
                                         </div>
                                         <div class="block_item">
                                             <img class="item_ico" src="./sources/images/svg/location.svg">
-                                            <span class="item_text">${Address || "No Address"}</span>
+                                            <span class="item_text">${Address || _("No Address")}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -80,24 +82,21 @@ export default class DetailsView extends JetView {
 					this.show(`contactsViews.form?id=${this.paramId}`);
 				}
 			},
-			padding: 20,
-			data: [{id: 1, Name: "Sasha"}]
-
-
+			padding: 20
 		};
 		const detailsTabbar = {
 			view: "tabbar",
-			options: ["Activities", "Files"],
+			options: [_("Activities"), _("Files")],
 			multiview: true
 
 		};
-		const activitiesTable = new ActivitiesTable(this.app, true);
+		const activitiesTable = new ActivitiesTable(this.app, true, true);
 		const addActivitiesBtn = {
 			view: "button",
-			label: '<i class="webix_icon wxi-plus"></i>Add Activity',
+			label: `<i class="webix_icon wxi-plus"></i>${_("Add Activity")}`,
 			width: 250,
 			click: () => {
-				this.win.showWindow("Add", "", this.paramId);
+				this.win.showWindow(_("Add"), "", this.paramId);
 			}
 		};
 
@@ -111,14 +110,14 @@ export default class DetailsView extends JetView {
 							{$subview: activitiesTable},
 							{cols: [{}, addActivitiesBtn]}
 						],
-						id: "Activities"
+						id: _("Activities")
 					},
 					{
 						rows: [
 							{$subview: ContactsFiles}
 
 						],
-						id: "Files"
+						id: _("Files")
 					}
 				]
 			}
@@ -146,7 +145,8 @@ export default class DetailsView extends JetView {
 	}
 
 	deleteContact() {
-		webix.confirm("Deleting cannot be undone. Delete?").then(() => {
+		const _ = this.app.getService("locale")._;
+		webix.confirm(_("Deleting cannot be undone. Delete?")).then(() => {
 			contactsCollection.remove(this.paramId);
 			activitiesCollection.data.each((obj) => {
 				if (+obj.ContactID === this.paramId) {

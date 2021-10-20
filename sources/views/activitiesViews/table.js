@@ -6,12 +6,34 @@ import contactsCollection from "../../models/contactsCollection";
 import ActWindowView from "./window";
 
 export default class ActivitiesTable extends JetView {
-	constructor(app, hideColumn) {
+	constructor(app, hideColumn, hideTabbar) {
 		super(app);
 		this.hideColumn = hideColumn;
+		this.hideTabbar = hideTabbar;
 	}
 
 	config() {
+		const _ = this.app.getService("locale")._;
+		const tableTabbar = {
+			view: "tabbar",
+			localId: "tableTabbar",
+			hidden: this.hideTabbar,
+			options: [
+				_("All"),
+				_("Overdue"),
+				_("Completed"),
+				_("Today"),
+				_("Tomorrow"),
+				_("This week"),
+				_("This month")
+			],
+			on: {
+				onChange: (value) => {
+					this.$$("activitiesTable").filterByAll();
+					this.filterByTab(value);
+				}
+			}
+		};
 		const activitiesTable = {
 			view: "datatable",
 			localId: "activitiesTable",
@@ -21,7 +43,7 @@ export default class ActivitiesTable extends JetView {
 				{id: "State", width: 40, header: "", template: "{common.checkbox()}", checkValue: "Close", uncheckValue: "Open"},
 				{
 					id: "TypeID",
-					header: ["Activity type", {
+					header: [{text: _("Activity type")}, {
 						content: "richSelectFilter",
 						suggest: {
 
@@ -32,24 +54,24 @@ export default class ActivitiesTable extends JetView {
 					}],
 					template({TypeID}) {
 						const type = actTypesCollection.getItem(TypeID);
-						return type ? type.Value : "No Value";
+						return type ? type.Value : _("No Value");
 					},
 					width: 170,
 					sort: "text"
 				},
 				{
 					id: "ObjDate",
-					header: ["Due date", {content: "dateRangeFilter"}],
+					header: [{text: _("Due date")}, {content: "dateRangeFilter"}],
 					width: 150,
 					sort: "date",
 					format: webix.Date.dateToStr("%d %M %Y")
 				},
-				{id: "Details", header: ["Details", {content: "textFilter"}], fillspace: true, sort: "text"},
+				{id: "Details", header: [{text: _("Details")}, {content: "textFilter"}], fillspace: true, sort: "text"},
 				{
 					id: "ContactID",
 					hidden: this.hideColumn,
 					header: [
-						"Contact",
+						{text: _("Contact")},
 						{
 							content: "richSelectFilter",
 							contentId: "contact",
@@ -80,7 +102,7 @@ export default class ActivitiesTable extends JetView {
 			],
 			onClick: {
 				edit: (e, item) => {
-					this.win.showWindow("Edit", item.row);
+					this.win.showWindow(_("Edit"), item.row);
 					return false;
 				},
 				remove: (e, item) => {
@@ -92,20 +114,25 @@ export default class ActivitiesTable extends JetView {
 			},
 			on: {
 				onAfterFilter: () => {
-					if (this.contactId) this.getRoot().filter("#ContactID#", this.contactId, true);
+					if (this.contactId) this.$$("activitiesTable").filter("#ContactID#", this.contactId, true);
+					this.filterByTab(this.$$("tableTabbar").getValue());
 				}
 			}
 
 		};
-		return activitiesTable;
+		const ui = {
+			rows: [tableTabbar, activitiesTable]
+		};
+		return ui;
 	}
 
 	init() {
 		this.win = this.ui(ActWindowView);
 	}
 
-	urlChange(view) {
-		view.showOverlay("Loading...");
+	urlChange() {
+		const table = this.$$("activitiesTable");
+		table.showOverlay("Loading...");
 		webix.promise.all([
 			activitiesCollection.waitData,
 			actTypesCollection.waitData,
@@ -113,12 +140,12 @@ export default class ActivitiesTable extends JetView {
 		])
 			.then(() => {
 				this.contactId = this.getParam("id");
-				view.sync(activitiesCollection, () => {
-					view.filterByAll();
+				table.sync(activitiesCollection, () => {
+					table.filterByAll();
 
-					if (this.contactId)view.filter("#ContactID#", this.contactId, true);
+					if (this.contactId)table.filter("#ContactID#", this.contactId, true);
 				});
-				view.hideOverlay();
+				table.hideOverlay();
 			});
 	}
 
@@ -127,5 +154,25 @@ export default class ActivitiesTable extends JetView {
 			return collection.getItem(obj.id)[prop];
 		}
 		return "";
+	}
+
+	filterByTab(value) {
+		const table = this.$$("activitiesTable");
+		const _ = this.app.getService("locale")._;
+		function criteries(obj) {
+			const d = new Date();
+			if (value === _("Overdue")) return new Date(obj.DueDate) < d && obj.State === "Open";
+			if (value === _("Completed")) return obj.State === "Close";
+			if (value === _("Today")) return d.getDate() === obj.Date.getDate();
+			if (value === _("Tomorrow")) return d.getDate() === obj.Date.getDate() - 1;
+			if (value === _("This week")) {
+				const first = d.getDate() - d.getDay();
+				const last = first + 6;
+				return first <= obj.Date.getDate() && obj.Date.getDate() <= last;
+			}
+			if (value === _("This month")) return d.getMonth() === obj.Date.getMonth() && d.getFullYear() === obj.Date.getFullYear();
+			return obj;
+		}
+		table.filter(obj => criteries(obj), "", true);
 	}
 }

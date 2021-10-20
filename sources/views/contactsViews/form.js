@@ -5,6 +5,7 @@ import statusesCollection from "../../models/statusesCollection";
 
 export default class ContactsFormView extends JetView {
 	config() {
+		const _ = this.app.getService("locale")._;
 		const contactsFormHeader = {
 			template: "Header",
 			localId: "contactsFormHeader",
@@ -20,8 +21,8 @@ export default class ContactsFormView extends JetView {
 			elements: [
 				{
 					cols: [
-						{view: "text", label: "First name", name: "FirstName", invalidMessage: "Must not be empty"},
-						{view: "text", label: "Email", name: "Email", labelWidth: "auto"}
+						{view: "text", label: _("First name"), name: "FirstName", invalidMessage: _("Must not be empty")},
+						{view: "text", label: _("Email"), name: "Email", labelWidth: "auto"}
 					],
 					padding: 5,
 					margin: 40,
@@ -29,8 +30,8 @@ export default class ContactsFormView extends JetView {
 				},
 				{
 					cols: [
-						{view: "text", label: "Last name", name: "LastName", invalidMessage: "Must not be empty"},
-						{view: "text", label: "Skype", name: "Skype", labelWidth: "auto"}
+						{view: "text", label: _("Last name"), name: "LastName", invalidMessage: _("Must not be empty")},
+						{view: "text", label: _("Skype"), name: "Skype", labelWidth: "auto"}
 					],
 					padding: 5,
 					margin: 40,
@@ -39,12 +40,12 @@ export default class ContactsFormView extends JetView {
 				{
 					cols: [
 						{view: "datepicker",
-							label: "Joing date",
+							label: _("Joing date"),
 							name: "StartDate",
 							format: "%d %M %Y"
 						},
 
-						{view: "text", label: "Phone", name: "Phone", labelWidth: "auto"}
+						{view: "text", label: _("Phone"), name: "Phone", labelWidth: "auto"}
 					],
 					padding: 5,
 					margin: 40,
@@ -53,7 +54,7 @@ export default class ContactsFormView extends JetView {
 				{
 					cols: [
 						{view: "richselect",
-							label: "Status",
+							label: _("Status"),
 							name: "StatusID",
 							options: {
 								body: {
@@ -61,7 +62,7 @@ export default class ContactsFormView extends JetView {
 									template: "#Value#"
 								}
 							}},
-						{view: "datepicker", label: "Birthday", name: "Birthday", labelWidth: "auto", format: "%d %M %Y"}
+						{view: "datepicker", label: _("Birthday"), name: "Birthday", labelWidth: "auto", format: "%d %M %Y"}
 					],
 					padding: 5,
 					margin: 40,
@@ -71,10 +72,10 @@ export default class ContactsFormView extends JetView {
 					cols: [
 						{
 							rows: [
-								{view: "text", label: "Job", name: "Job"},
-								{view: "text", label: "Company", name: "Company"},
-								{view: "text", label: "Website", name: "Website"},
-								{view: "text", label: "Address", name: "Address"},
+								{view: "text", label: _("Job"), name: "Job"},
+								{view: "text", label: _("Company"), name: "Company"},
+								{view: "text", label: _("Website"), name: "Website"},
+								{view: "text", label: _("Address"), name: "Address"},
 								{}
 							],
 							padding: 5,
@@ -99,7 +100,7 @@ export default class ContactsFormView extends JetView {
 									rows: [
 										{},
 										{view: "uploader",
-											value: "Change photo",
+											value: _("Change photo"),
 											autosend: false,
 											accept: "image/jpeg, image/png",
 											multiple: false,
@@ -110,7 +111,7 @@ export default class ContactsFormView extends JetView {
 											}
 										},
 										{view: "button",
-											value: "Delete photo",
+											value: _("Delete photo"),
 											click: () => {
 												webix.confirm("Delete photo?").then(() => {
 													this.$$("image").setValues({src: ""});
@@ -147,7 +148,7 @@ export default class ContactsFormView extends JetView {
 							}
 						},
 						{view: "button",
-							value: "Cancel",
+							value: _("Cancel"),
 							width: 150,
 							click: () => {
 								this.app.callEvent("select", [this.paramId]);
@@ -170,6 +171,7 @@ export default class ContactsFormView extends JetView {
 	}
 
 	urlChange() {
+		const _ = this.app.getService("locale")._;
 		this.paramId = this.getParam("id", true);
 		const form = this.$$("contactsForm");
 		const header = this.$$("contactsFormHeader");
@@ -182,14 +184,14 @@ export default class ContactsFormView extends JetView {
 					this.$$("image").setValues({src: item.Photo});
 				}
 			});
-			header.setHTML("Edit");
-			button.setValue("Edit");
+			header.setHTML(_("Edit"));
+			button.setValue(_("Edit"));
 		}
 		else {
 			form.clear();
 			this.$$("image").setValues({src: ""});
-			header.setHTML("Add");
-			button.setValue("Add");
+			header.setHTML(_("Add"));
+			button.setValue(_("Add"));
 		}
 	}
 

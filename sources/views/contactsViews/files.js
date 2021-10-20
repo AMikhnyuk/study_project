@@ -4,15 +4,16 @@ import filesCollection from "../../models/filesCollection";
 
 export default class ContactsFiles extends JetView {
 	config() {
+		const _ = this.app.getService("locale")._;
 		const filesTable = {
 			view: "datatable",
 			localId: "filesDatatable",
 			css: "webix_header_border webix_data_border",
 			scrollX: false,
 			columns: [
-				{id: "name", header: "Name", fillspace: true, sort: "text"},
+				{id: "name", header: _("Name"), fillspace: true, sort: "text"},
 				{id: "date",
-					header: "Change date",
+					header: _("Change date"),
 					width: 220,
 					template({date}) {
 						return webix.Date.dateToStr("%d %M %Y")(date);
@@ -20,7 +21,7 @@ export default class ContactsFiles extends JetView {
 					sort: "date"
 				},
 				{id: "size",
-					header: "Size",
+					header: _("Size"),
 					width: 200,
 					sort: "int",
 					template: "#size#Kb"
@@ -30,7 +31,7 @@ export default class ContactsFiles extends JetView {
 			],
 			onClick: {
 				remove: (e, item) => {
-					webix.confirm("Deleting cannot be undone. Delete?").then(() => {
+					webix.confirm(_("Deleting cannot be undone. Delete?")).then(() => {
 						filesCollection.remove(item.row);
 						this.$$("filesDatatable").filter("#ContactID#", this.paramId);
 					});
@@ -43,7 +44,7 @@ export default class ContactsFiles extends JetView {
 			localId: "uploader",
 			upload: "",
 			autosend: false,
-			label: '<i class="webix_icon wxi-file"></i>Upload File',
+			label: `<i class="webix_icon wxi-file"></i>${_("Upload File")}`,
 			on: {
 				onBeforeFileAdd: (file) => {
 					file.date = new Date();
