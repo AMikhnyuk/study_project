@@ -79,26 +79,27 @@ export default class ContactsView extends JetView {
 					list.unselectAll();
 					if (id)list.select(id);
 					else list.select(contactsCollection.getFirstId());
+					this.listFilter();
 				});
 
 				filter.attachEvent("onTimedKeyPress", () => {
-					const value = filter.getValue().toLowerCase();
-					list.filter(obj => obj.FirstName
-						.toLowerCase()
-						.indexOf(value) !== -1 || obj.LastName
-						.toLowerCase()
-						.indexOf(value) !== -1 || obj.Company
-						.toLowerCase()
-						.indexOf(value) !== -1 || obj.Job
-						.toLowerCase()
-						.indexOf(value) !== -1 || obj.Email
-						.toLowerCase()
-						.indexOf(value) !== -1 || obj.Skype
-						.toLowerCase()
-						.indexOf(value) !== -1 || obj.Address
-						.toLowerCase()
-						.indexOf(value) !== -1);
+					this.listFilter();
 				});
 			});
+	}
+
+	listFilter() {
+		const list = this.$$("contactsList");
+		const filter = this.$$("contactFilter");
+		const value = filter.getValue().toLowerCase();
+		function compare(item) {
+			return item.toLowerCase().indexOf(value) !== -1;
+		}
+		list.filter(obj => compare(obj.FirstName) ||
+		compare(obj.LastName) ||
+		compare(obj.Company) ||
+		compare(obj.Job) ||
+		compare(obj.Email) ||
+		compare(obj.LastName));
 	}
 }

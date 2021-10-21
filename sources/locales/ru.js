@@ -38,6 +38,7 @@ export default {
 	Time: "Время",
 	Website: "Веб-сайт",
 	Skype: "Скайп",
+	"Delete?": "Удалить?",
 	"Custom Settings": "Пользовательские Настройки",
 	"Must not be empty": "Поле не должно быть пустым",
 	"Deleting cannot be undone. Delete?": "Удаление нельзя отменить, Удалить?",
@@ -66,6 +67,6 @@ export default {
 	"Joing date": "Дата вступления",
 	"Delete photo": "Удалить фото",
 	"Change photo": "Изменить фото",
-	"Activity Types": "Виды Активсностей ",
+	"Activity Types": "Виды Активностей ",
 	"Activity type": "Вид активности"
 };

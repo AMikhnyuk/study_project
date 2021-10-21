@@ -19,18 +19,18 @@ export default class ActivitiesTable extends JetView {
 			localId: "tableTabbar",
 			hidden: this.hideTabbar,
 			options: [
-				_("All"),
-				_("Overdue"),
-				_("Completed"),
-				_("Today"),
-				_("Tomorrow"),
-				_("This week"),
-				_("This month")
+				{id: "all", value: _("All")},
+				{id: "overdue", value: _("Overdue")},
+				{id: "completed", value: _("Completed")},
+				{id: "today", value: _("Today")},
+				{id: "tomorrow", value: _("Tomorrow")},
+				{id: "thisWeek", value: _("This week")},
+				{id: "thisMonth", value: _("This month.")}
 			],
 			on: {
-				onChange: (value) => {
+				onChange: (id) => {
 					this.$$("activitiesTable").filterByAll();
-					this.filterByTab(value);
+					this.filterByTab(id);
 				}
 			}
 		};
@@ -106,7 +106,7 @@ export default class ActivitiesTable extends JetView {
 					return false;
 				},
 				remove: (e, item) => {
-					webix.confirm("Delete?").then(() => {
+					webix.confirm(_("Delete?")).then(() => {
 						activitiesCollection.remove(item.row);
 					});
 					return false;
@@ -156,25 +156,26 @@ export default class ActivitiesTable extends JetView {
 		return "";
 	}
 
-	filterByTab(value) {
+	filterByTab(id) {
 		const table = this.$$("activitiesTable");
-		const _ = this.app.getService("locale")._;
 		function criteries(obj) {
 			const d = new Date();
-			if (value === _("Overdue")) return new Date(obj.DueDate) < d && obj.State === "Open";
-			if (value === _("Completed")) return obj.State === "Close";
-			if (value === _("Today")) return d.getDate() === obj.Date.getDate();
-			if (value === _("Tomorrow")) return d.getDate() === obj.Date.getDate() - 1;
-			if (value === _("This week")) {
+			function now() {
+				return d.getFullYear() === obj.Date.getFullYear() &&
+				d.getMonth() === obj.Date.getMonth();
+			}
+			if (id === "overdue") return new Date(obj.DueDate) < d && obj.State === "Open";
+			if (id === "completed") return obj.State === "Close";
+			if (id === "today") return d.getDate() === obj.Date.getDate();
+			if (id === "tomorrow") return webix.Date.add(d, 1, "day", true).getDate() === obj.Date.getDate() && now();
+			if (id === "thisWeek") {
 				const first = d.getDate() - d.getDay();
 				const last = first + 6;
 
 				return first <= obj.Date.getDate() &&
-				obj.Date.getDate() <= last &&
-				d.getFullYear() === obj.Date.getFullYear() &&
-				d.getMonth() === obj.Date.getMonth();
+				obj.Date.getDate() <= last && now();
 			}
-			if (value === _("This month")) return d.getMonth() === obj.Date.getMonth() && d.getFullYear() === obj.Date.getFullYear();
+			if (id === "thisMonth") return now();
 			return obj;
 		}
 		table.filter(obj => criteries(obj), "", true);

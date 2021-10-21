@@ -38,6 +38,7 @@ export default {
 	Files: "Files",
 	Size: "Size",
 	Time: "Time",
+	"Delete?": "Delete?",
 	"Deleting cannot be undone. Delete?": "Deleting cannot be undone. Delete?",
 	"Add activity": "Add activity",
 	"This week": "This week",
