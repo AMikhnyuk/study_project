@@ -168,7 +168,11 @@ export default class ActivitiesTable extends JetView {
 			if (value === _("This week")) {
 				const first = d.getDate() - d.getDay();
 				const last = first + 6;
-				return first <= obj.Date.getDate() && obj.Date.getDate() <= last;
+
+				return first <= obj.Date.getDate() &&
+				obj.Date.getDate() <= last &&
+				d.getFullYear() === obj.Date.getFullYear() &&
+				d.getMonth() === obj.Date.getMonth();
 			}
 			if (value === _("This month")) return d.getMonth() === obj.Date.getMonth() && d.getFullYear() === obj.Date.getFullYear();
 			return obj;

@@ -87,6 +87,16 @@ export default class ContactsView extends JetView {
 						.toLowerCase()
 						.indexOf(value) !== -1 || obj.LastName
 						.toLowerCase()
+						.indexOf(value) !== -1 || obj.Company
+						.toLowerCase()
+						.indexOf(value) !== -1 || obj.Job
+						.toLowerCase()
+						.indexOf(value) !== -1 || obj.Email
+						.toLowerCase()
+						.indexOf(value) !== -1 || obj.Skype
+						.toLowerCase()
+						.indexOf(value) !== -1 || obj.Address
+						.toLowerCase()
 						.indexOf(value) !== -1);
 				});
 			});

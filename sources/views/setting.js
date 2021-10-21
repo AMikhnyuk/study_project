@@ -10,7 +10,7 @@ export default class SettingsView extends JetView {
 		const _ = this.app.getService("locale")._;
 
 		const title = value => ({
-			template:_(value),
+			template: _(value),
 			type: "header",
 			paddingY: 20
 		});
@@ -46,18 +46,14 @@ export default class SettingsView extends JetView {
 						title("Custom Settings"),
 						settingsTabbar,
 						{
-							
-								
-									
+
+
 							cells: [
 								{$subview: typesTable, id: "activities"},
 								{$subview: statusesTable, id: "statuses"}
-								],
-								
-									
-									
-							
-						
+							]
+
+
 						}
 					]
 				}
