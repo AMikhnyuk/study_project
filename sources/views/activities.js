@@ -15,7 +15,7 @@ export default class ActivitiesView extends JetView {
 					view: "button",
 					label: `<i class="webix_icon wxi-plus"></i><span>${_("Add activity")}</span>`,
 					click: () => {
-						this.win.showWindow("Add");
+						this.win.showWindow(_("Add"));
 					},
 					width: 150
 				}

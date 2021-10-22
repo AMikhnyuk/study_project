@@ -106,7 +106,7 @@ export default class ActWindowView extends JetView {
 		}
 
 		this.$$("window").getHead().setHTML(`${text} ${_("activity")}`);
-		this.$$("save").setValue(_(text));
+		this.$$("save").setValue(text);
 	}
 
 	formSave() {

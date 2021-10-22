@@ -25,7 +25,7 @@ export default class ActivitiesTable extends JetView {
 				{id: "today", value: _("Today")},
 				{id: "tomorrow", value: _("Tomorrow")},
 				{id: "thisWeek", value: _("This week")},
-				{id: "thisMonth", value: _("This month.")}
+				{id: "thisMonth", value: _("This month")}
 			],
 			on: {
 				onChange: (id) => {
@@ -111,12 +111,17 @@ export default class ActivitiesTable extends JetView {
 					});
 					return false;
 				}
+
 			},
 			on: {
 				onAfterFilter: () => {
 					if (this.contactId) this.$$("activitiesTable").filter("#ContactID#", this.contactId, true);
 					this.filterByTab(this.$$("tableTabbar").getValue());
+				},
+				onCheck: () => {
+					this.filterByTab(this.$$("tableTabbar").getValue());
 				}
+
 			}
 
 		};

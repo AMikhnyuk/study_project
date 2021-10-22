@@ -42,7 +42,7 @@ export default {
 	"Deleting cannot be undone. Delete?": "Deleting cannot be undone. Delete?",
 	"Add activity": "Add activity",
 	"This week": "This week",
-	"This month": "В этом месяце",
+	"This month": "This month",
 	"No Value": "No Value",
 	"Due date": "Due date",
 	"No Email": "No Email",
