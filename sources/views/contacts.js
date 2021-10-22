@@ -100,6 +100,6 @@ export default class ContactsView extends JetView {
 		compare(obj.Company) ||
 		compare(obj.Job) ||
 		compare(obj.Email) ||
-		compare(obj.LastName));
+		compare(obj.Address));
 	}
 }

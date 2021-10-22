@@ -164,23 +164,27 @@ export default class ActivitiesTable extends JetView {
 	filterByTab(id) {
 		const table = this.$$("activitiesTable");
 		function criteries(obj) {
-			const d = new Date();
-			function now() {
-				return d.getFullYear() === obj.Date.getFullYear() &&
-				d.getMonth() === obj.Date.getMonth();
-			}
-			if (id === "overdue") return new Date(obj.DueDate) < d && obj.State === "Open";
-			if (id === "completed") return obj.State === "Close";
-			if (id === "today") return d.getDate() === obj.Date.getDate();
-			if (id === "tomorrow") return webix.Date.add(d, 1, "day", true).getDate() === obj.Date.getDate() && now();
-			if (id === "thisWeek") {
-				const first = d.getDate() - d.getDay();
-				const last = first + 6;
+			const d = webix.Date.dayStart(new Date());
+			const o = webix.Date.dayStart(obj.Date);
 
-				return first <= obj.Date.getDate() &&
-				obj.Date.getDate() <= last && now();
+			function thisMonth() {
+				return d.getFullYear() === o.getFullYear() &&
+				d.getMonth() === o.getMonth();
 			}
-			if (id === "thisMonth") return now();
+
+			if (id === "overdue") return new Date(obj.DueDate) < new Date() && obj.State === "Open";
+			if (id === "completed") return obj.State === "Close";
+			if (id === "today") return webix.Date.equal(d, o);
+			if (id === "tomorrow") return webix.Date.equal(webix.Date.add(d, 1, "day", true), o);
+			if (id === "thisMonth") return thisMonth();
+			if (id === "thisWeek") {
+				const first = webix.Date.weekStart(d);
+				const last = webix.Date.add(first, 6, "day", true);
+
+				return first.getDate() <= o.getDate() &&
+				o.getDate() <= last.getDate() && thisMonth();
+			}
+
 			return obj;
 		}
 		table.filter(obj => criteries(obj), "", true);
