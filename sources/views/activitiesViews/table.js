@@ -161,32 +161,31 @@ export default class ActivitiesTable extends JetView {
 		return "";
 	}
 
+	thisMonth(d, o) {
+		return d.getFullYear() === o.getFullYear() &&
+		d.getMonth() === o.getMonth();
+	}
+
 	filterByTab(id) {
 		const table = this.$$("activitiesTable");
-		function criteries(obj) {
+		const criteria = (obj) => {
 			const d = webix.Date.dayStart(new Date());
 			const o = webix.Date.dayStart(obj.Date);
-
-			function thisMonth() {
-				return d.getFullYear() === o.getFullYear() &&
-				d.getMonth() === o.getMonth();
-			}
 
 			if (id === "overdue") return new Date(obj.DueDate) < new Date() && obj.State === "Open";
 			if (id === "completed") return obj.State === "Close";
 			if (id === "today") return webix.Date.equal(d, o);
 			if (id === "tomorrow") return webix.Date.equal(webix.Date.add(d, 1, "day", true), o);
-			if (id === "thisMonth") return thisMonth();
+			if (id === "thisMonth") return this.thisMonth(d, o);
 			if (id === "thisWeek") {
 				const first = webix.Date.weekStart(d);
 				const last = webix.Date.add(first, 6, "day", true);
 
-				return first.getDate() <= o.getDate() &&
-				o.getDate() <= last.getDate() && thisMonth();
+				return first < obj.Date && obj.Date < last;
 			}
 
 			return obj;
-		}
-		table.filter(obj => criteries(obj), "", true);
+		};
+		table.filter(obj => criteria(obj), "", true);
 	}
 }
