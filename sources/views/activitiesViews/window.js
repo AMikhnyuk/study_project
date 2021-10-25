@@ -7,6 +7,7 @@ import contactsCollection from "../../models/contactsCollection";
 
 export default class ActWindowView extends JetView {
 	config() {
+		const _ = this.app.getService("locale")._;
 		return {
 			view: "window",
 			localId: "window",
@@ -19,10 +20,10 @@ export default class ActWindowView extends JetView {
 				view: "form",
 				localId: "form",
 				elements: [
-					{view: "textarea", label: "Details", name: "Details"},
+					{view: "textarea", label: _("Details"), name: "Details"},
 					{
 						view: "richselect",
-						label: "Type",
+						label: _("Activity type"),
 						name: "TypeID",
 						options: {
 							body: {
@@ -30,31 +31,31 @@ export default class ActWindowView extends JetView {
 								template: "#Value#"
 							}
 						},
-						invalidMessage: "Choose activity"
+						invalidMessage: _("Choose activity")
 					},
 					{
 						view: "richselect",
-						label: "Contact",
+						label: _("Contact"),
 						name: "ContactID",
 						localId: "contact",
 						options: {
 							body: {
 								data: contactsCollection,
 								template({FirstName, LastName}) {
-									return `${FirstName || "Noname"} ${LastName || "Noname"}`;
+									return `${FirstName || _("No firts name")} ${LastName || _("No last name")}`;
 								}
 							}
 						},
-						invalidMessage: "Choose contact"
+						invalidMessage: _("Choose contact")
 					},
 					{
 						cols: [
-							{view: "datepicker", label: "Date", name: "Date"},
-							{view: "datepicker", label: "Time", type: "time", name: "Time"}
+							{view: "datepicker", label: _("Date"), name: "Date"},
+							{view: "datepicker", label: _("Time"), type: "time", name: "Time"}
 						],
 						borderless: true
 					},
-					{view: "checkbox", labelRight: "Completed", labelWidth: 0, name: "State", checkValue: "Close", uncheckValue: "Open"},
+					{view: "checkbox", labelRight: _("Completed"), labelWidth: 0, name: "State", checkValue: "Close", uncheckValue: "Open"},
 					{
 						view: "toolbar",
 						localId: "buttons",
@@ -71,7 +72,7 @@ export default class ActWindowView extends JetView {
 							},
 							{
 								view: "button",
-								value: "Cancel",
+								value: _("Cancel"),
 								width: 100,
 								click: () => {
 									const form = this.$$("form");
@@ -95,6 +96,7 @@ export default class ActWindowView extends JetView {
 	}
 
 	showWindow(text, id, contactID) {
+		const _ = this.app.getService("locale")._;
 		this.getRoot().show();
 		const form = this.$$("form");
 		if (id)	form.setValues(activitiesCollection.getItem(id));
@@ -103,7 +105,7 @@ export default class ActWindowView extends JetView {
 			this.$$("contact").disable();
 		}
 
-		this.$$("window").getHead().setHTML(`${text} activity`);
+		this.$$("window").getHead().setHTML(`${text} ${_("activity")}`);
 		this.$$("save").setValue(text);
 	}
 

@@ -2,6 +2,7 @@ import {JetView, plugins} from "webix-jet";
 
 export default class TopView extends JetView {
 	config() {
+		const _ = this.app.getService("locale")._;
 		const header = {
 			type: "header",
 			localId: "top_header",
@@ -12,7 +13,7 @@ export default class TopView extends JetView {
 			localId: "top_list",
 			select: true,
 			scroll: false,
-			data: [{id: "contacts", value: "Contacts"}, {id: "activities", value: "Activities"}, {id: "setting", value: "Settings"}],
+			data: [{id: "contacts", value: _("Contacts")}, {id: "activities", value: _("Activities")}, {id: "setting", value: _("Settings")}],
 			on: {
 				onAfterSelect: () => {
 					this.$$("top_header").setHTML(this.$$("top_list").getSelectedItem().value);

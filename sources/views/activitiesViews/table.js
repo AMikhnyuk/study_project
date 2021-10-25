@@ -6,12 +6,34 @@ import contactsCollection from "../../models/contactsCollection";
 import ActWindowView from "./window";
 
 export default class ActivitiesTable extends JetView {
-	constructor(app, hideColumn) {
+	constructor(app, hideColumn, hideTabbar) {
 		super(app);
 		this.hideColumn = hideColumn;
+		this.hideTabbar = hideTabbar;
 	}
 
 	config() {
+		const _ = this.app.getService("locale")._;
+		const tableTabbar = {
+			view: "tabbar",
+			localId: "tableTabbar",
+			hidden: this.hideTabbar,
+			options: [
+				{id: "all", value: _("All")},
+				{id: "overdue", value: _("Overdue")},
+				{id: "completed", value: _("Completed")},
+				{id: "today", value: _("Today")},
+				{id: "tomorrow", value: _("Tomorrow")},
+				{id: "thisWeek", value: _("This week")},
+				{id: "thisMonth", value: _("This month")}
+			],
+			on: {
+				onChange: (id) => {
+					this.$$("activitiesTable").filterByAll();
+					this.filterByTab(id);
+				}
+			}
+		};
 		const activitiesTable = {
 			view: "datatable",
 			localId: "activitiesTable",
@@ -21,7 +43,7 @@ export default class ActivitiesTable extends JetView {
 				{id: "State", width: 40, header: "", template: "{common.checkbox()}", checkValue: "Close", uncheckValue: "Open"},
 				{
 					id: "TypeID",
-					header: ["Activity type", {
+					header: [{text: _("Activity type")}, {
 						content: "richSelectFilter",
 						suggest: {
 
@@ -32,24 +54,24 @@ export default class ActivitiesTable extends JetView {
 					}],
 					template({TypeID}) {
 						const type = actTypesCollection.getItem(TypeID);
-						return type ? type.Value : "No Value";
+						return type ? type.Value : _("No Value");
 					},
 					width: 170,
 					sort: "text"
 				},
 				{
 					id: "ObjDate",
-					header: ["Due date", {content: "dateRangeFilter"}],
+					header: [{text: _("Due date")}, {content: "dateRangeFilter"}],
 					width: 150,
 					sort: "date",
 					format: webix.Date.dateToStr("%d %M %Y")
 				},
-				{id: "Details", header: ["Details", {content: "textFilter"}], fillspace: true, sort: "text"},
+				{id: "Details", header: [{text: _("Details")}, {content: "textFilter"}], fillspace: true, sort: "text"},
 				{
 					id: "ContactID",
 					hidden: this.hideColumn,
 					header: [
-						"Contact",
+						{text: _("Contact")},
 						{
 							content: "richSelectFilter",
 							contentId: "contact",
@@ -80,32 +102,42 @@ export default class ActivitiesTable extends JetView {
 			],
 			onClick: {
 				edit: (e, item) => {
-					this.win.showWindow("Edit", item.row);
+					this.win.showWindow(_("Edit"), item.row);
 					return false;
 				},
 				remove: (e, item) => {
-					webix.confirm("Delete?").then(() => {
+					webix.confirm(_("Delete?")).then(() => {
 						activitiesCollection.remove(item.row);
 					});
 					return false;
 				}
+
 			},
 			on: {
 				onAfterFilter: () => {
-					if (this.contactId) this.getRoot().filter("#ContactID#", this.contactId, true);
+					if (this.contactId) this.$$("activitiesTable").filter("#ContactID#", this.contactId, true);
+					this.filterByTab(this.$$("tableTabbar").getValue());
+				},
+				onCheck: () => {
+					this.filterByTab(this.$$("tableTabbar").getValue());
 				}
+
 			}
 
 		};
-		return activitiesTable;
+		const ui = {
+			rows: [tableTabbar, activitiesTable]
+		};
+		return ui;
 	}
 
 	init() {
 		this.win = this.ui(ActWindowView);
 	}
 
-	urlChange(view) {
-		view.showOverlay("Loading...");
+	urlChange() {
+		const table = this.$$("activitiesTable");
+		table.showOverlay("Loading...");
 		webix.promise.all([
 			activitiesCollection.waitData,
 			actTypesCollection.waitData,
@@ -113,12 +145,12 @@ export default class ActivitiesTable extends JetView {
 		])
 			.then(() => {
 				this.contactId = this.getParam("id");
-				view.sync(activitiesCollection, () => {
-					view.filterByAll();
+				table.sync(activitiesCollection, () => {
+					table.filterByAll();
 
-					if (this.contactId)view.filter("#ContactID#", this.contactId, true);
+					if (this.contactId)table.filter("#ContactID#", this.contactId, true);
 				});
-				view.hideOverlay();
+				table.hideOverlay();
 			});
 	}
 
@@ -127,5 +159,33 @@ export default class ActivitiesTable extends JetView {
 			return collection.getItem(obj.id)[prop];
 		}
 		return "";
+	}
+
+	thisMonth(d, o) {
+		return d.getFullYear() === o.getFullYear() &&
+		d.getMonth() === o.getMonth();
+	}
+
+	filterByTab(id) {
+		const table = this.$$("activitiesTable");
+		const criteria = (obj) => {
+			const d = webix.Date.dayStart(new Date());
+			const o = webix.Date.dayStart(obj.Date);
+
+			if (id === "overdue") return new Date(obj.DueDate) < new Date() && obj.State === "Open";
+			if (id === "completed") return obj.State === "Close";
+			if (id === "today") return webix.Date.equal(d, o);
+			if (id === "tomorrow") return webix.Date.equal(webix.Date.add(d, 1, "day", true), o);
+			if (id === "thisMonth") return this.thisMonth(d, o);
+			if (id === "thisWeek") {
+				const first = webix.Date.weekStart(d);
+				const last = webix.Date.add(first, 6, "day", true);
+
+				return first < obj.Date && obj.Date < last;
+			}
+
+			return obj;
+		};
+		table.filter(obj => criteria(obj), "", true);
 	}
 }

@@ -6,6 +6,11 @@ import statusesCollection from "../models/statusesCollection";
 
 export default class ContactsView extends JetView {
 	config() {
+		const _ = this.app.getService("locale")._;
+		const contactFilter = {
+			view: "text",
+			localId: "contactFilter"
+		};
 		const contactsList = {
 			view: "list",
 			select: "true",
@@ -36,14 +41,24 @@ export default class ContactsView extends JetView {
 		};
 		const addContactsButton = {
 			view: "button",
-			label: '<i class="webix_icon wxi-plus"></i>Add Contact',
+			label: `<i class="webix_icon wxi-plus"></i>${_("Add Contact")}`,
 			click: () => {
 				this.show("contactsViews.form");
 			}
 		};
 
 		const ui = {
-			cols: [{rows: [contactsList, addContactsButton], gravity: 2}, {$subview: true}],
+			cols: [
+				{
+					rows: [
+						contactFilter,
+						contactsList,
+						addContactsButton
+					],
+					gravity: 2
+				},
+				{$subview: true}
+			],
 			gravity: 6
 		};
 		return ui;
@@ -51,7 +66,7 @@ export default class ContactsView extends JetView {
 
 	init() {
 		const list = this.$$("contactsList");
-
+		const filter = this.$$("contactFilter");
 		webix.promise.all([
 			contactsCollection.waitData,
 			statusesCollection.waitData,
@@ -64,7 +79,27 @@ export default class ContactsView extends JetView {
 					list.unselectAll();
 					if (id)list.select(id);
 					else list.select(contactsCollection.getFirstId());
+					this.listFilter();
+				});
+
+				filter.attachEvent("onTimedKeyPress", () => {
+					this.listFilter();
 				});
 			});
+	}
+
+	listFilter() {
+		const list = this.$$("contactsList");
+		const filter = this.$$("contactFilter");
+		const value = filter.getValue().toLowerCase();
+		function compare(item) {
+			return item.toLowerCase().indexOf(value) !== -1;
+		}
+		list.filter(obj => compare(obj.FirstName) ||
+		compare(obj.LastName) ||
+		compare(obj.Company) ||
+		compare(obj.Job) ||
+		compare(obj.Email) ||
+		compare(obj.Address));
 	}
 }
